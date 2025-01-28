@@ -29,17 +29,17 @@ pub fn get_two_slices<T>(slice: &[T], n: usize) -> (&[T], &[T]) {
 
 pub fn get_four_slices<T>(slice: &[T]) -> [&[T]; 4] {
     let mut arr = [&[] as &[T]; 4];
-    let c = (slice.len() as f32 / 4.).round() as usize;
-    if c == 0 {
-        for i in 0..slice.len() {
-            arr[i] = &slice[i..=i];
-        }
+    if slice.is_empty() {
         return arr;
     }
-    arr[0] = &slice[0..c];
-    arr[1] = &slice[c..(2 * c)];
-    arr[2] = &slice[(2 * c)..(3 * c)];
-    arr[3] = &slice[(3 * c)..];
+
+    let mut begin = 0;
+    for (i, v) in arr.iter_mut().enumerate() {
+        let end = begin + slice.len() / 4 + if slice.len() % 4 > i { 1 } else { 0 };
+        *v = &slice[begin..end];
+        begin = end;
+    }
+
     arr
 }
 
@@ -105,6 +105,16 @@ mod tests {
     }
 
     #[test]
+    fn get_four_slices_empty() {
+        let numbers: Vec<i32> = Vec::new();
+        let a = get_four_slices(&numbers[..]);
+        assert_eq!(a[0], &[]);
+        assert_eq!(a[1], &[]);
+        assert_eq!(a[2], &[]);
+        assert_eq!(a[3], &[]);
+    }
+
+    #[test]
     fn get_four_slices_one() {
         let numbers = [2, 3, 5];
         let a = get_four_slices(&numbers[..]);
@@ -118,10 +128,10 @@ mod tests {
     fn get_four_slices_two() {
         let numbers = [2, 3, 5, 7, 11];
         let a = get_four_slices(&numbers[..]);
-        assert_eq!(a[0], &[2]);
-        assert_eq!(a[1], &[3]);
-        assert_eq!(a[2], &[5]);
-        assert_eq!(a[3], &[7, 11]);
+        assert_eq!(a[0], &[2, 3]);
+        assert_eq!(a[1], &[5]);
+        assert_eq!(a[2], &[7]);
+        assert_eq!(a[3], &[11]);
     }
 
     #[test]
