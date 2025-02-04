@@ -7,21 +7,21 @@ pub fn get_tuple_element<T>(tuple: &mut (T, T), flag: bool) -> &mut T {
 }
 
 pub fn get_n_slice_element<T>(slice: &mut [T], n: usize) -> &mut T {
-    if slice.len() <= n {
+    if n >= slice.len() {
         println!("Index: {:?} out of bounds!", n);
     }
     &mut slice[n]
 }
 
 pub fn get_n_end_slice_element<T>(slice: &[T], n: usize) -> &T {
-    if slice.len() <= n {
+    if n >= slice.len() {
         println!("Index: {:?} out of bounds!", n);
     }
     &slice[slice.len() - 1 - n]
 }
 
 pub fn get_two_slices<T>(slice: &[T], n: usize) -> (&[T], &[T]) {
-    if slice.len() <= n {
+    if n >= slice.len() {
         println!("Index: {:?} out of bounds!", n);
     }
     (&slice[..n], &slice[n..])
@@ -29,9 +29,9 @@ pub fn get_two_slices<T>(slice: &[T], n: usize) -> (&[T], &[T]) {
 
 pub fn get_four_slices<T>(slice: &[T]) -> [&[T]; 4] {
     let mut arr = [&[] as &[T]; 4];
-    if slice.is_empty() {
+    /*if slice.is_empty() {
         return arr;
-    }
+    }*/
 
     let mut begin = 0;
     for (i, v) in arr.iter_mut().enumerate() {
