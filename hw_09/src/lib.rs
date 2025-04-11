@@ -1,11 +1,9 @@
-#[allow(dead_code)]
-trait Shape {
+pub trait Shape {
     fn get_area(&self) -> f64;
     fn get_perimeter(&self) -> f64;
 }
 
-#[allow(dead_code)]
-struct Triangle {
+pub struct Triangle {
     sides_lens: [f64; 3],
 }
 
@@ -20,8 +18,7 @@ impl Shape for Triangle {
     }
 }
 
-#[allow(dead_code)]
-struct Rectangle {
+pub struct Rectangle {
     width: f64,
     height: f64,
 }
@@ -36,8 +33,7 @@ impl Shape for Rectangle {
     }
 }
 
-#[allow(dead_code)]
-struct Circle {
+pub struct Circle {
     radius: f64,
 }
 
@@ -51,8 +47,7 @@ impl Shape for Circle {
     }
 }
 
-#[allow(dead_code)]
-fn perimeter_by_area(shape: Box<dyn Shape>) -> f64 {
+pub fn perimeter_by_area(shape: Box<dyn Shape>) -> f64 {
     shape.get_perimeter() / shape.get_area()
 }
 
