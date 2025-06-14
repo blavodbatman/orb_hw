@@ -24,7 +24,7 @@ impl Input<'_> {
             self.input.drain(..1); // оставляем от input часть после пробела
         }
         if self.logger.cmd.borrow().autocomplete == "y" {
-            self.logger.cmd.borrow_mut().autocomplete = "n".to_string();
+            self.logger.cmd.borrow_mut().autocomplete = "n".to_owned();
             if !expression.ends_with('}') {
                 return expression + "}";
             }
