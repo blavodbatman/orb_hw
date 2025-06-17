@@ -27,7 +27,7 @@ impl SinglyLinkedList {
         }
     }
 
-    fn add_first(&mut self, val: u32) {
+    fn add_first(&mut self, val: u32) -> bool {
         self.size += 1;
         let node = Rc::new(RefCell::new(Node {
             vl: val,
@@ -37,21 +37,20 @@ impl SinglyLinkedList {
         if self.last.is_none() {
             self.last = Some(node);
         }
+        true
     }
 
     fn add_middle(&mut self, val: u32, idx: usize) -> bool {
         if idx > self.size {
             return false;
         }
-        self.size += 1;
         if idx == 0 {
-            self.add_first(val);
-            return true;
+            return self.add_first(val);
         }
         if idx == self.size {
-            self.add_last(val);
-            return true;
+            return self.add_last(val);
         }
+        self.size += 1;
         let previous = self.iter().nth(idx - 1);
         let node = Rc::new(RefCell::new(Node {
             vl: val,
@@ -61,7 +60,7 @@ impl SinglyLinkedList {
         true
     }
 
-    fn add_last(&mut self, val: u32) {
+    fn add_last(&mut self, val: u32) -> bool {
         self.size += 1;
         let node = Rc::new(RefCell::new(Node { vl: val, ne: None }));
         if self.last.is_some() {
@@ -70,6 +69,7 @@ impl SinglyLinkedList {
             self.first = Some(node.clone());
         }
         self.last = Some(node);
+        true
     }
 
     fn clear(&mut self) {
@@ -101,23 +101,28 @@ impl Iterator for SinglyLinkedListIterator {
 
 fn main() {
     let mut list = SinglyLinkedList::new();
-    list.add_last(10);
-    list.add_last(20);
-    list.add_last(30);
-    list.add_first(0);
+    assert!(list.add_last(10));
+    assert!(list.add_last(20));
+    assert!(list.add_last(30));
+    assert!(list.add_first(0));
     assert_eq!(list.size, 4);
     list.iter().for_each(|v| println!("{}", v.borrow().vl));
+    println!("-----------");
 
     list.clear();
     assert_eq!(list.size, 0);
-    list.add_first(30);
-    list.add_first(20);
-    list.add_first(10);
-    list.add_last(40);
+    assert!(list.add_first(30));
+    assert!(list.add_first(20));
+    assert!(list.add_first(10));
+    assert!(list.add_last(40));
     assert_eq!(list.size, 4);
     list.iter().for_each(|v| println!("{}", v.borrow().vl));
+    println!("-----------");
 
-    list.add_middle(55, 1);
-    assert_eq!(list.size, 5);
+    assert!(!list.add_middle(111, 5));
+    assert!(list.add_middle(0, 0));
+    assert!(list.add_middle(111, 1));
+    assert!(list.add_middle(222, 6));
+    assert_eq!(list.size, 7);
     list.iter().for_each(|v| println!("{}", v.borrow().vl));
 }
