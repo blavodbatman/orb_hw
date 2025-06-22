@@ -1,0 +1,13 @@
+[package]
+name = "passman"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+regex = "1.11.1"
+thiserror = "2.0.12"
+rpassword = "7.4.0"
+aes = "0.8.4"
+cbc = {  version = "0.1.2", features = ["std"] }
+ring = "0.17.14"
+data-encoding = "2.9.0"
