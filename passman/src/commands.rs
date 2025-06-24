@@ -162,11 +162,10 @@ pub fn type_password(message: &str) -> String {
 
 pub fn save_mpassword(mpass: &str) -> Result<()> {
     let rng = rand::SystemRandom::new();
-
     let mut salt = [0u8; SALT_AND_HASH_LEN];
     rng.fill(&mut salt).map_err(|_| Errors::Unspecified)?;
-
     let mut pbkdf2_hash = [0u8; SALT_AND_HASH_LEN];
+
     pbkdf2::derive(
         pbkdf2::PBKDF2_HMAC_SHA512,
         NonZeroU32::new(100_000).unwrap(),
@@ -337,4 +336,89 @@ fn decrypt_data(data: String, key: &[u8]) -> Result<String> {
     )
     .map_err(|_| Errors::Unspecified)?;
     Ok(String::from_utf8_lossy(&data).to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_master_password() {
+        let rng = rand::SystemRandom::new();
+        let mut salt = [0u8; SALT_AND_HASH_LEN];
+        rng.fill(&mut salt).unwrap();
+        let mut pbkdf2_hash = [0u8; SALT_AND_HASH_LEN];
+
+        pbkdf2::derive(
+            pbkdf2::PBKDF2_HMAC_SHA512,
+            NonZeroU32::new(100_000).unwrap(),
+            &salt,
+            "right".as_bytes(),
+            &mut pbkdf2_hash,
+        );
+
+        let succeed = pbkdf2::verify(
+            pbkdf2::PBKDF2_HMAC_SHA512,
+            NonZeroU32::new(100_000).unwrap(),
+            &salt,
+            "right".as_bytes(),
+            &pbkdf2_hash,
+        );
+        assert!(succeed.is_ok());
+
+        let fail = pbkdf2::verify(
+            pbkdf2::PBKDF2_HMAC_SHA512,
+            NonZeroU32::new(100_000).unwrap(),
+            &salt,
+            "wrong".as_bytes(),
+            &pbkdf2_hash,
+        );
+        assert!(!fail.is_ok());
+    }
+
+    #[test]
+    fn test_generate_crypto_key() {
+        let out_arr = generate_crypto_key("master");
+        assert_eq!(out_arr.len(), CRYPTO_KEY_LEN);
+    }
+
+    #[test]
+    fn test_encrypt_decrypt_data() {
+        let data = "raw_data".as_bytes();
+        let key = &generate_crypto_key("master");
+        let rng = rand::SystemRandom::new();
+        let mut init_vec = [0u8; INIT_VEC_LEN];
+        rng.fill(&mut init_vec).unwrap();
+
+        let encrypted_vec = encrypt(data, key, &init_vec).unwrap();
+        let decrypted_vec = decrypt(&encrypted_vec, key, &init_vec).unwrap();
+
+        assert_eq!(decrypted_vec, data);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_invalid_key() {
+        let data = "raw_data".as_bytes();
+        let rng = rand::SystemRandom::new();
+        let mut init_vec = [0u8; INIT_VEC_LEN];
+        rng.fill(&mut init_vec).unwrap();
+
+        let encrypted_vec = encrypt(data, &generate_crypto_key("right"), &init_vec).unwrap();
+        let _ = decrypt(&encrypted_vec, &generate_crypto_key("wrong"), &init_vec).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_invalid_init_vec() {
+        let data = "raw_data".as_bytes();
+        let rng = rand::SystemRandom::new();
+        let mut init_vec = [0u8; INIT_VEC_LEN];
+        rng.fill(&mut init_vec).unwrap();
+
+        let encrypted_vec = encrypt(data, &generate_crypto_key("right"), &init_vec).unwrap();
+        init_vec = [0u8; INIT_VEC_LEN];
+        rng.fill(&mut init_vec).unwrap();
+        let _ = decrypt(&encrypted_vec, &generate_crypto_key("right"), &init_vec).unwrap();
+    }
 }
