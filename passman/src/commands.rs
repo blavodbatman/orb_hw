@@ -204,12 +204,21 @@ pub fn check_mpassword(pass: &str) -> Result<bool> {
 }
 
 fn check_password() -> Result<String> {
-    let pass = rpassword::read_password().map_err(|_| Errors::InvalidFormat)?;
-    if !Regex::new(r"^[0-9A-Za-z]{6,20}$").unwrap().is_match(&pass) {
+    let password;
+    if let Ok(pass) = rpassword::read_password() {
+        password = pass;
+    } else {
         println!("Password must consist of numbers and Latin letters, from 6 to 20 characters.");
         return Err(Errors::InvalidFormat);
     }
-    Ok(pass)
+    if !Regex::new(r"^[0-9A-Za-z]{6,20}$")
+        .unwrap()
+        .is_match(&password)
+    {
+        println!("Password must consist of numbers and Latin letters, from 6 to 20 characters.");
+        return Err(Errors::InvalidFormat);
+    }
+    Ok(password)
 }
 
 fn type_name() -> String {
