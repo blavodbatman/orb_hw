@@ -34,7 +34,7 @@ fn main() {
         println!("Enter command (type help to show available commands or type exit):");
         std::io::stdin().read_line(&mut command).unwrap();
         if let Err(e) = execute_command(&command, &mpass) {
-            println!("{e}")
+            eprintln!("{e}")
         };
         if command.trim() == "exit" || command.trim() == "delete file" {
             break;
