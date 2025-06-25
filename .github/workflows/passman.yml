@@ -2,7 +2,7 @@ name: passman
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "passman" ]
   pull_request:
     branches: [ "master" ]
 
